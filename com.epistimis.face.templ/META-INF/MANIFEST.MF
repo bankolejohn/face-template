@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.epistimis.face.templ
+Bundle-ManifestVersion: 2
+Bundle-Name: com.epistimis.face.templ
+Bundle-Vendor: Epistimis LLC
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.epistimis.face.templ; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.16.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.common,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: com.epistimis.face.templ.serializer,
+ com.epistimis.face.templ,
+ com.epistimis.face.templ.templ,
+ com.epistimis.face.templ.validation,
+ com.epistimis.face.templ.services,
+ com.epistimis.face.templ.parser.antlr.internal,
+ com.epistimis.face.templ.generator,
+ com.epistimis.face.templ.parser.antlr,
+ com.epistimis.face.templ.formatting2,
+ com.epistimis.face.templ.scoping,
+ com.epistimis.face.templ.templ.impl,
+ com.epistimis.face.templ.templ.util
+Import-Package: org.apache.log4j

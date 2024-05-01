@@ -1,0 +1,434 @@
+grammar com.epistimis.face.templ.Templ with org.eclipse.xtext.common.Terminals
+
+generate templ "http://www.epistimis.com/face/templ/Templ"
+
+// TODO: 2 rules partially disabled: DesignatedEntityTypeReferencePath and ExplicitEntityTypeReferenceJoinPath
+// These need to be addresses to have full support
+
+TemplateSpecification:
+	(usingExternalTemplateStatement+=UsingExternalTemplateStatement)*
+	structuredTemplateElementTypeDecl+=StructuredTemplateElementTypeDecl
+	(structuredTemplateElementTypeDecl+=StructuredTemplateElementTypeDecl)*;
+
+
+UsingExternalTemplateStatement:
+	KW_USING externalTemplateTypeReference=ExternalTemplateTypeReference
+	SEMICOLON;
+
+StructuredTemplateElementTypeDecl:
+	MainTemplateMethodDecl |
+	SupportingTemplateMethodDecl | UnionTypeDecl;
+
+MainTemplateMethodDecl:
+	MainEntityTypeTemplateMethodDecl |
+	MainEquivalentEntityTypeTemplateMethodDecl;
+
+MainEntityTypeTemplateMethodDecl:
+	KW_MAIN LEFT_PAREN (primaryParameter=PrimaryEntityTypeTemplateMethodParameter)? (COMMA
+	KW_VARARGS (optionalParameterList=OptionalEntityTypeTemplateMethodParameterList)?)?
+	RIGHT_PAREN
+	body=EntityTypeTemplateMethodBody;
+
+PrimaryEntityTypeTemplateMethodParameter:
+	EntityTypeTemplateMethodParameter;
+
+OptionalEntityTypeTemplateMethodParameterList:
+	parameter+=EntityTypeTemplateMethodParameter (COMMA
+	parameter+=EntityTypeTemplateMethodParameter)*;
+
+EntityTypeTemplateMethodParameter:
+	EntityTypeStructuredTemplateElementDeclaredParameterExpression;
+
+MainEquivalentEntityTypeTemplateMethodDecl:
+	KW_MAIN
+	decl=EquivalentEntityTypeTemplateMethodDecl;
+
+SupportingTemplateMethodDecl:
+	SupportingEntityTypeTemplateMethodDecl |
+	SupportingEquivalentEntityTypeTemplateMethodDecl;
+
+SupportingEntityTypeTemplateMethodDecl:
+	type=TemplateElementTypeName
+	LEFT_PAREN primaryParameter=PrimaryEntityTypeTemplateMethodParameter RIGHT_PAREN
+	body=EntityTypeTemplateMethodBody;
+
+SupportingEquivalentEntityTypeTemplateMethodDecl:
+	type=TemplateElementTypeName decl=EquivalentEntityTypeTemplateMethodDecl;
+
+EntityTypeTemplateMethodBody:
+	LEFT_BRACE
+	member+=EntityTypeTemplateMethodMember (member+=EntityTypeTemplateMethodMember)*
+	RIGHT_BRACE;
+
+EntityTypeTemplateMethodMember:
+	EntityTypeStructuredTemplateElementMember;
+
+EquivalentEntityTypeTemplateMethodDecl:
+	LEFT_ANGLE_BRACKET
+	parameterList=EquivalentEntityTypeTemplateMethodParameterList RIGHT_ANGLE_BRACKET
+	body=EquivalentEntityTypeTemplateMethodBody;
+
+EquivalentEntityTypeTemplateMethodParameterList:
+	parameter+=EquivalentEntityTypeTemplateMethodParameter (COMMA
+	parameter+=EquivalentEntityTypeTemplateMethodParameter)*;
+
+EquivalentEntityTypeTemplateMethodBody:
+	LEFT_BRACE
+	member+=EquivalentEntityTypeTemplateMethodMember (member+=EquivalentEntityTypeTemplateMethodMember)* RIGHT_BRACE;
+
+EquivalentEntityTypeTemplateMethodMember:
+	stmt=EquivalentEntityTypeTemplateElementMemberStatement SEMICOLON;
+
+EquivalentEntityTypeTemplateElementMemberStatement:
+	(optional?=OptionalAnnotation)?
+	characteristicRef=DesignatedEquivalentEntityNonEntityTypeCharacteristicReference (DEREF
+	memberRef=IdlstructMemberReference)?  (KW_AS
+	memberName=StructuredTemplateElementMemberName)?;
+
+UnionTypeDecl:
+	KW_UNION type=TemplateElementTypeName LEFT_PAREN
+	parameter=UnionParameter RIGHT_PAREN body=UnionBody;
+
+UnionParameter:
+	EntityTypeStructuredTemplateElementDeclaredParameterExpression;
+
+UnionBody:
+	LEFT_BRACE switch=UnionSwitchStatement RIGHT_BRACE;
+
+UnionSwitchStatement:
+	KW_SWITCH LEFT_PAREN discriminator=DiscriminatorType
+	RIGHT_PAREN body=UnionSwitchBody;
+
+UnionSwitchBody:
+	LEFT_BRACE case+=CaseExpression (case+=CaseExpression)*
+	RIGHT_BRACE;
+
+DiscriminatorType:
+	{DiscriminatorType} IdldiscriminatorType |
+	DesignatedEntityEnumerationTypeCharacteristicReference;
+
+CaseExpression:
+	label+=CaseLabel (label+=CaseLabel)* member=UnionMember;
+
+CaseLabel:
+	KW_CASE literal=CaseLabelLiteral COLON | {CaseLabel} KW_DEFAULT COLON;
+
+CaseLabelLiteral:
+	EnumLiteralReferenceExpression |
+	{CaseLabelLiteral} IdldiscriminatorTypeLiteral;
+
+UnionMember:
+	member=EntityTypeStructuredTemplateElementMember;
+
+EntityTypeStructuredTemplateElementMember:
+	stmt=EntityTypeStructuredTemplateElementMemberStatement SEMICOLON;
+
+EntityTypeStructuredTemplateElementMemberStatement:
+	DesignatedEntityCharacteristicReferenceStatement |
+	StructuredTemplateElementTypeReferenceStatement;
+
+OptionalAnnotation:
+	AT_SYMBOL KW_OPTIONAL;
+
+InlineAnnotation:
+	AT_SYMBOL KW_INLINE;
+
+DesignatedEntityCharacteristicReferenceStatement:
+	ExplicitDesignatedEntityNonEntityTypeCharacteristicReferenceExpression
+	| DesignatedEntityNonEntityTypeCharacteristicWildcardReference;
+
+ExplicitDesignatedEntityNonEntityTypeCharacteristicReferenceExpression:
+	(OptionalAnnotation)?
+	characteristicRef=DesignatedEntityNonEntityTypeCharacteristicReference (DEREF
+	memberRef=IdlstructMemberReference)?  (KW_AS
+	memberName=StructuredTemplateElementMemberName)?;
+
+StructuredTemplateElementTypeReferenceStatement:
+	InlineAnnotation
+	StructuredTemplateElementTypeReferenceExpression | (optional?=OptionalAnnotation)?
+	refExpression=StructuredTemplateElementTypeReferenceExpression
+	memberName=StructuredTemplateElementMemberName;
+
+StructuredTemplateElementTypeReferenceExpression:
+	typeRef=EntityTypeStructuredTemplateElementTypeReference LEFT_PAREN
+	parameterList=StructuredTemplateElementTypeReferenceParameterList RIGHT_PAREN |
+	methodRef=EquivalentEntityTypeTemplateMethodReference LEFT_ANGLE_BRACKET
+	parameterList=StructuredTemplateElementTypeReferenceParameterList RIGHT_ANGLE_BRACKET;
+
+StructuredTemplateElementTypeReferenceParameterList:
+	primaryTypeRefParameter=PrimaryStructuredTemplateElementTypeReferenceParameter (COMMA
+	optionalTypeRefParameter+=OptionalStructuredTemplateElementTypeReferenceParameter)*;
+
+PrimaryStructuredTemplateElementTypeReferenceParameter:
+	StructuredTemplateElementTypeReferenceParameter;
+
+OptionalStructuredTemplateElementTypeReferenceParameter:
+	StructuredTemplateElementTypeReferenceParameter;
+
+StructuredTemplateElementTypeReferenceParameter:
+	(declParameterRef=EntityTypeStructuredTemplateElementDeclaredParameterReference EQUALS)?
+	refPath=DesignatedEntityTypeReferencePath;
+
+ExternalTemplateTypeReference:
+	name=ID;
+
+EntityTypeStructuredTemplateElementTypeReference:
+	name=ID;
+
+EntityTypeStructuredTemplateElementDeclaredParameterReference:
+	name=ID;
+
+EntityTypeStructuredTemplateElementDeclaredParameterExpression:
+	typeRef=EntityTypeReference (parameterAlias=EntityTypeStructuredTemplateElementDeclaredParameterAlias)?;
+
+EntityTypeStructuredTemplateElementDeclaredParameterAlias:
+	name=ID;
+
+StructuredTemplateElementMemberName:
+	name=ID;
+
+TemplateElementTypeName:
+	name=ID;
+
+EquivalentEntityTypeTemplateMethodReference:
+	name=ID;
+
+EquivalentEntityTypeTemplateMethodParameter:
+	name=ID;
+
+DesignatedEquivalentEntityNonEntityTypeCharacteristicReference:
+	parameterRef=EquivalentEntityTypeTemplateMethodParameterReference PERIOD
+	characteristicRef=EquivalentEntityTypeTemplateMethodCharacteristicReference;
+
+EquivalentEntityTypeTemplateMethodParameterReference:
+	name=ID;
+
+EquivalentEntityTypeTemplateMethodCharacteristicReference:
+	name=ID;
+
+DesignatedEntityNonEntityTypeCharacteristicReference:
+	path=DesignatedEntityTypeReferencePath PERIOD
+	characteristicRef=QueryProjectedNonEntityTypeCharacteristicReference |
+	QueryProjectedNonEntityTypeCharacteristicReferenceOrAlias;
+
+DesignatedEntityNonEntityTypeCharacteristicWildcardReference:
+	{DesignatedEntityNonEntityTypeCharacteristicWildcardReference} (path=DesignatedEntityTypeReferencePath PERIOD)?  ASTERISK;
+
+DesignatedEntityEnumerationTypeCharacteristicReference:
+	path=DesignatedEntityTypeReferencePath PERIOD
+	characteristicRef=QueryProjectedEnumerationTypeCharacteristicReference |
+	QueryProjectedEnumerationTypeCharacteristicReferenceOrAlias;
+
+// TODO: Partially disable this to get past ambiguity caused by this and ExplicitEntityTypeReferenceJoinPath
+DesignatedEntityTypeReferencePath:
+	/*(joinPath=ExplicitEntityTypeReferenceJoinPath)?*/ typeRef=DesignatedEntityTypeReference;
+
+// TODO: Partially disable this to get past ambiguity caused by this and DesignatedEntityTypeReferencePath
+ExplicitEntityTypeReferenceJoinPath:
+	(typeRef+=JoinPathEntityTypeReference
+	PERIOD) ; // (typeRef+=JoinPathEntityTypeReference PERIOD)*;
+
+JoinPathEntityTypeReference:
+	QualifiedEntityTypeReference;
+
+DesignatedEntityTypeReference:
+	QualifiedEntityTypeReference;
+
+QualifiedEntityTypeReference:
+	typeRef=EntityTypeReference (qualifier=EntityCharacteristicValueQualifier)?;
+
+EntityTypeReference:
+	QuerySelectedEntityTypeReferenceOrAlias;
+
+EntityCharacteristicValueQualifier:
+	QueryWhereClauseCriteria;
+
+IdlstructMemberReference:
+	name=ID;
+
+EnumLiteralReferenceExpression:
+	LEFT_BRACE type=EnumerationTypeReference
+	COLON literal=EnumerationLiteralReference RIGHT_BRACE;
+
+EnumerationTypeReference:
+	name=ID;
+
+EnumerationLiteralReference:
+	name=ID;
+
+/* Criteria Is A Production Rule Defined In The Query Grammar Specified In appendix j.3.1.
+ * So pull the string and then parse it with that grammar
+ */
+QueryWhereClauseCriteria:
+	LEFT_BRACKET criteria=STRING /*Criteria*/ RIGHT_BRACKET;
+
+QueryProjectedNonEntityTypeCharacteristicReferenceOrAlias:
+	name=ID;
+
+QueryProjectedNonEntityTypeCharacteristicReference:
+	name=ID;
+
+QueryProjectedEnumerationTypeCharacteristicReferenceOrAlias:
+	name=ID;
+
+QueryProjectedEnumerationTypeCharacteristicReference:
+	name=ID;
+
+QuerySelectedEntityTypeReferenceOrAlias:
+	name=ID;
+
+IdldiscriminatorType:
+	IdlunsignedInt | Idlboolean;
+
+IdlunsignedInt:
+	IdlunsignedShort | IdlunsignedLong | IdlunsignedLongLong;
+
+IdlunsignedShort:
+	KW_UNSIGNED KW_SHORT;
+
+IdlunsignedLong:
+	KW_UNSIGNED KW_LONG;
+
+IdlunsignedLongLong:
+	KW_UNSIGNED KW_LONG KW_LONG;
+
+Idlboolean:
+	KW_BOOLEAN;
+
+IdldiscriminatorTypeLiteral:
+	IdlintegerLiteral | IdloctalLiteral |
+	IdlhexLiteral | IdlbooleanLiteral;
+
+IdlintegerLiteral:
+	ZeroDigitLiteral | PositiveDigitLiteral (DigitLiteral)*;
+
+IdloctalLiteral:
+	ZeroDigitLiteral OctalDigitLiteral (OctalDigitLiteral)*;
+
+IdlhexLiteral:
+	ZeroDigitLiteral ("x" | "X") HexDigitLiteral (HexDigitLiteral)*;
+
+IdlbooleanLiteral:
+	KW_TRUE | KW_FALSE;
+
+terminal KW_MAIN:
+	"Main" | "main";
+
+terminal KW_USING:
+	"Using" | "using";
+
+terminal KW_AS:
+	"As" | "as";
+
+terminal KW_VARARGS:
+	"Varargs" | "varargs";
+
+terminal KW_OPTIONAL:
+	"Optional" | "optional";
+
+terminal KW_INLINE:
+	"Inline" | "inline";
+
+terminal KW_UNION:
+	"Union" | "union";
+
+terminal KW_SWITCH:
+	"Switch" | "switch";
+
+terminal KW_CASE:
+	"Case" | "case";
+
+terminal KW_DEFAULT:
+	"Default" | "default";
+
+terminal KW_BOOLEAN:
+	"Boolean" | "boolean";
+
+terminal KW_SHORT:
+	"Short" | "short";
+
+terminal KW_LONG:
+	"Long" | "long";
+
+terminal KW_UNSIGNED:
+	"Unsigned" | "unsigned";
+
+terminal KW_TRUE:
+	"True";
+
+terminal KW_FALSE:
+	"False";
+
+terminal DEREF:
+	"->";
+
+terminal ASTERISK:
+	"*";
+
+terminal LEFT_BRACE:
+	"{";
+
+terminal RIGHT_BRACE:
+	"}";
+
+terminal LEFT_PAREN:
+	"(";
+
+terminal RIGHT_PAREN:
+	")";
+
+terminal LEFT_BRACKET:
+	"[";
+
+terminal RIGHT_BRACKET:
+	"]";
+
+terminal LEFT_ANGLE_BRACKET:
+	"<";
+
+terminal RIGHT_ANGLE_BRACKET:
+	">";
+
+terminal COMMA:
+	",";
+
+terminal COLON:
+	":";
+
+terminal SEMICOLON:
+	";";
+
+terminal PERIOD:
+	".";
+
+terminal AT_SYMBOL:
+	"@";
+
+terminal EQUALS:
+	"=";
+
+OctalDigitLiteral:
+	ZeroDigitLiteral | "1" | "2" | "3" | "4" | "5" | "6" |
+	"7";
+
+HexDigitLiteral:
+	DigitLiteral | "a" | "b" | "c" | "d" | "e" | "f" | "A" |
+	"B" | "C" | "D" | "E" | "F";
+
+/* use standard IDENTIFIER */
+//Identifier : CharLiteral  (  CharLiteral | DigitLiteral  )* ;
+CharLiteral:
+	"a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" |
+	"l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" |
+	"y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" |
+	"L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" |
+	"Y" | "Z" | "_";
+
+DigitLiteral:
+	ZeroDigitLiteral | PositiveDigitLiteral;
+
+ZeroDigitLiteral:
+	"0";
+
+PositiveDigitLiteral:
+	"1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";

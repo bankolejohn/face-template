@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: com.epistimis.face.templ.ui
+Bundle-ManifestVersion: 2
+Bundle-Name: com.epistimis.face.templ.ui
+Bundle-Vendor: Epistimis LLC
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: com.epistimis.face.templ.ui; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: com.epistimis.face.templ,
+ com.epistimis.face.templ.ide,
+ org.eclipse.xtext.ui,
+ org.eclipse.xtext.ui.shared,
+ org.eclipse.xtext.ui.codetemplates.ui,
+ org.eclipse.ui.editors;bundle-version="3.14.300",
+ org.eclipse.ui.ide;bundle-version="3.18.500",
+ org.eclipse.jdt.core,
+ org.eclipse.xtend.lib,
+ org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.compare,
+ org.eclipse.xtext.builder,
+ org.eclipse.core.resources,
+ org.eclipse.pde.core,
+ org.eclipse.ui.forms
+Import-Package: org.apache.log4j,
+ org.eclipse.xtext.ui.codemining;resolution:=optional
+Bundle-RequiredExecutionEnvironment: JavaSE-17
+Export-Package: com.epistimis.face.templ.ui.quickfix,
+ com.epistimis.face.templ.ui.internal,
+ com.epistimis.face.templ.ui.wizard,
+ com.epistimis.face.templ.ui.contentassist
+Bundle-Activator: com.epistimis.face.templ.ui.internal.TemplActivator
